@@ -68,3 +68,8 @@ def run_tool_loop(messages, tools, executor, max_rounds=6, verbose=True, **kwarg
             messages.append({"role": "tool", "tool_call_id": call.id, "content": result})
     return "(stopped: too many tool rounds)"
             
+def peek_tool_calls(messages, tools, **kwargs):
+    """Ask the model ONE question. Returns (message, [(tool_name, raw_arguments), ...]). Runs nothing."""
+    resp = client.chat.completions.create(model=MODEL, messages=messages, tools=tools, **kwargs)
+    msg = resp.choices[0].message
+    return msg, [(c.function.name, c.function.arguments) for c in (msg.tool_calls or [])]
